@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
   const imageUpload = document.getElementById('imageUpload');
-  const frameOptionsContainer = document.getElementById('frameOptionsContainer');
   const previewCanvas = document.getElementById('previewCanvas');
   const ctx = previewCanvas.getContext('2d');
   const downloadButton = document.getElementById('downloadButton');
@@ -14,14 +13,21 @@ document.addEventListener('DOMContentLoaded', () => {
   let isDragging = false;
   let dragStartX = 0, dragStartY = 0;
 
-  const frames = [
-    { id: 'default', name: 'Mặc định', src: 'frames/default-frame.png' }
-    // Thêm các khung sự kiện khác nếu cần
-  ];
-
   function setInitialCanvasSize() {
     previewCanvas.width = 500;
     previewCanvas.height = 350;
+    imageX = previewCanvas.width / 2;
+    imageY = previewCanvas.height / 2;
+  }
+
+  function setCanvasSizeBasedOnFrame() {
+    if (selectedFrame && selectedFrame.image) {
+      const aspectRatio = selectedFrame.image.naturalWidth / selectedFrame.image.naturalHeight;
+      previewCanvas.width = 500;
+      previewCanvas.height = previewCanvas.width / aspectRatio;
+    } else {
+      setInitialCanvasSize();
+    }
     imageX = previewCanvas.width / 2;
     imageY = previewCanvas.height / 2;
   }
@@ -47,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.fillStyle = "#777";
       ctx.textAlign = "center";
       ctx.font = "16px Arial";
-      ctx.fillText("Tải ảnh & chọn khung", previewCanvas.width / 2, previewCanvas.height / 2);
+      ctx.fillText("Tải ảnh của bạn lên", previewCanvas.width / 2, previewCanvas.height / 2);
     }
 
     if (selectedFrame && selectedFrame.image) {
@@ -55,46 +61,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function setCanvasSizeBasedOnFrame() {
-    if (selectedFrame && selectedFrame.image) {
-      const aspectRatio = selectedFrame.image.naturalWidth / selectedFrame.image.naturalHeight;
-      previewCanvas.width = 500;
-      previewCanvas.height = previewCanvas.width / aspectRatio;
-    } else {
-      setInitialCanvasSize();
-    }
-    imageX = previewCanvas.width / 2;
-    imageY = previewCanvas.height / 2;
-  }
+  // Tự động tải khung mặc định
+  const defaultFrame = {
+    id: 'default',
+    name: 'Khung mặc định',
+    src: 'frames/default-frame.png'
+  };
 
-  function displayFrameOptions() {
-    frameOptionsContainer.innerHTML = '';
-    frames.forEach(frame => {
-      const div = document.createElement('div');
-      div.className = 'frame-option';
-      div.style.backgroundImage = `url(${frame.src})`;
-      div.title = frame.name;
-      div.dataset.frameId = frame.id;
-
-      div.addEventListener('click', () => {
-        document.querySelectorAll('.frame-option.selected').forEach(el => el.classList.remove('selected'));
-        div.classList.add('selected');
-
-        const frameImage = new Image();
-        frameImage.onload = () => {
-          selectedFrame = { ...frame, image: frameImage };
-          setCanvasSizeBasedOnFrame();
-          drawCanvas();
-          downloadButton.disabled = !userImage;
-        };
-        frameImage.src = frame.src;
-      });
-
-      frameOptionsContainer.appendChild(div);
-    });
-
-    frameOptionsContainer.firstChild?.click();
-  }
+  const frameImage = new Image();
+  frameImage.onload = () => {
+    selectedFrame = { ...defaultFrame, image: frameImage };
+    setCanvasSizeBasedOnFrame();
+    drawCanvas();
+  };
+  frameImage.onerror = () => {
+    console.error("Không thể tải khung viền mặc định.");
+    selectedFrame = null;
+    setInitialCanvasSize();
+    drawCanvas();
+  };
+  frameImage.src = defaultFrame.src;
 
   imageUpload.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -103,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
     reader.onload = () => {
       userImage = new Image();
       userImage.onload = () => {
-        if (!selectedFrame) setCanvasSizeBasedOnFrame();
+        setCanvasSizeBasedOnFrame();
         imageX = previewCanvas.width / 2;
         imageY = previewCanvas.height / 2;
         imageScale = 1;
@@ -124,6 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     drawCanvas();
   });
 
+  // Chuột - kéo ảnh
   previewCanvas.addEventListener('mousedown', (e) => {
     if (!userImage) return;
     const rect = previewCanvas.getBoundingClientRect();
@@ -154,53 +141,60 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  ['mouseup', 'mouseleave'].forEach(evt => previewCanvas.addEventListener(evt, () => {
-    isDragging = false;
-    previewCanvas.style.cursor = userImage ? 'grab' : 'default';
-  }));
-previewCanvas.addEventListener('touchstart', (e) => {
-  if (!userImage || e.touches.length !== 1) return;
-  const touch = e.touches[0];
-  const rect = previewCanvas.getBoundingClientRect();
-  const touchX = touch.clientX - rect.left;
-  const touchY = touch.clientY - rect.top;
+  ['mouseup', 'mouseleave'].forEach(evt =>
+    previewCanvas.addEventListener(evt, () => {
+      isDragging = false;
+      previewCanvas.style.cursor = userImage ? 'grab' : 'default';
+    })
+  );
 
-  const scaledWidth = userImage.naturalWidth * imageScale;
-  const scaledHeight = userImage.naturalHeight * imageScale;
-
-  const imgLeft = imageX - scaledWidth / 2;
-  const imgRight = imageX + scaledWidth / 2;
-  const imgTop = imageY - scaledHeight / 2;
-  const imgBottom = imageY + scaledHeight / 2;
-
-  if (touchX >= imgLeft && touchX <= imgRight && touchY >= imgTop && touchY <= imgBottom) {
-    isDragging = true;
-    dragStartX = touchX - imageX;
-    dragStartY = touchY - imageY;
-  }
-});
-previewCanvas.addEventListener('touchmove', (e) => {
-  if (!isDragging || !userImage || e.touches.length !== 1) return;
-
-  e.preventDefault(); // NGĂN CUỘN TRANG
-
-  const touch = e.touches[0];
-  const rect = previewCanvas.getBoundingClientRect();
-  const moveX = touch.clientX - rect.left;
-  const moveY = touch.clientY - rect.top;
-
-  imageX = moveX - dragStartX;
-  imageY = moveY - dragStartY;
-  drawCanvas();
-}, { passive: false }); // BẮT BUỘC phải có
-['touchend', 'touchcancel'].forEach(evt =>
-  previewCanvas.addEventListener(evt, () => {
-    isDragging = false;
-  })
-);
   previewCanvas.addEventListener('mouseenter', () => {
     previewCanvas.style.cursor = userImage ? 'grab' : 'default';
   });
+
+  // Cảm ứng - kéo ảnh
+  previewCanvas.addEventListener('touchstart', (e) => {
+    if (!userImage || e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    const rect = previewCanvas.getBoundingClientRect();
+    const touchX = touch.clientX - rect.left;
+    const touchY = touch.clientY - rect.top;
+
+    const scaledWidth = userImage.naturalWidth * imageScale;
+    const scaledHeight = userImage.naturalHeight * imageScale;
+
+    const imgLeft = imageX - scaledWidth / 2;
+    const imgRight = imageX + scaledWidth / 2;
+    const imgTop = imageY - scaledHeight / 2;
+    const imgBottom = imageY + scaledHeight / 2;
+
+    if (touchX >= imgLeft && touchX <= imgRight && touchY >= imgTop && touchY <= imgBottom) {
+      isDragging = true;
+      dragStartX = touchX - imageX;
+      dragStartY = touchY - imageY;
+    }
+  });
+
+  previewCanvas.addEventListener('touchmove', (e) => {
+    if (!isDragging || !userImage || e.touches.length !== 1) return;
+
+    e.preventDefault(); // ⭐ Ngăn cuộn trang khi kéo ảnh
+
+    const touch = e.touches[0];
+    const rect = previewCanvas.getBoundingClientRect();
+    const moveX = touch.clientX - rect.left;
+    const moveY = touch.clientY - rect.top;
+
+    imageX = moveX - dragStartX;
+    imageY = moveY - dragStartY;
+    drawCanvas();
+  }, { passive: false });
+
+  ['touchend', 'touchcancel'].forEach(evt =>
+    previewCanvas.addEventListener(evt, () => {
+      isDragging = false;
+    })
+  );
 
   downloadButton.addEventListener('click', () => {
     if (!userImage) {
@@ -236,6 +230,4 @@ previewCanvas.addEventListener('touchmove', (e) => {
     link.download = 'anh_da_ghep_khung.png';
     link.click();
   });
-
-  displayFrameOptions();
 });
