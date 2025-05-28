@@ -125,6 +125,39 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   previewCanvas.addEventListener('mousedown', (e) => {
+    if (!userImage) return;
+    const rect = previewCanvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const w = userImage.naturalWidth * imageScale;
+    const h = userImage.naturalHeight * imageScale;
+
+    if (
+      mouseX >= imageX - w / 2 &&
+      mouseX <= imageX + w / 2 &&
+      mouseY >= imageY - h / 2 &&
+      mouseY <= imageY + h / 2
+    ) {
+      isDragging = true;
+      dragStartX = mouseX - imageX;
+      dragStartY = mouseY - imageY;
+      previewCanvas.style.cursor = 'grabbing';
+    }
+  });
+
+  previewCanvas.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+      const rect = previewCanvas.getBoundingClientRect();
+      imageX = e.clientX - rect.left - dragStartX;
+      imageY = e.clientY - rect.top - dragStartY;
+      drawCanvas();
+    }
+  });
+
+  ['mouseup', 'mouseleave'].forEach(evt => previewCanvas.addEventListener(evt, () => {
+    isDragging = false;
+    previewCanvas.style.cursor = userImage ? 'grab' : 'default';
+  }));
 previewCanvas.addEventListener('touchstart', (e) => {
   if (!userImage || e.touches.length !== 1) return;
   const touch = e.touches[0];
@@ -162,40 +195,6 @@ previewCanvas.addEventListener('touchmove', (e) => {
     isDragging = false;
   })
 );
-    if (!userImage) return;
-    const rect = previewCanvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    const w = userImage.naturalWidth * imageScale;
-    const h = userImage.naturalHeight * imageScale;
-
-    if (
-      mouseX >= imageX - w / 2 &&
-      mouseX <= imageX + w / 2 &&
-      mouseY >= imageY - h / 2 &&
-      mouseY <= imageY + h / 2
-    ) {
-      isDragging = true;
-      dragStartX = mouseX - imageX;
-      dragStartY = mouseY - imageY;
-      previewCanvas.style.cursor = 'grabbing';
-    }
-  });
-
-  previewCanvas.addEventListener('mousemove', (e) => {
-    if (isDragging) {
-      const rect = previewCanvas.getBoundingClientRect();
-      imageX = e.clientX - rect.left - dragStartX;
-      imageY = e.clientY - rect.top - dragStartY;
-      drawCanvas();
-    }
-  });
-
-  ['mouseup', 'mouseleave'].forEach(evt => previewCanvas.addEventListener(evt, () => {
-    isDragging = false;
-    previewCanvas.style.cursor = userImage ? 'grab' : 'default';
-  }));
-
   previewCanvas.addEventListener('mouseenter', () => {
     previewCanvas.style.cursor = userImage ? 'grab' : 'default';
   });
