@@ -160,3 +160,6 @@ input[type="range"] {
     flex-basis: 70%;
   }
 }
+.frame-selection-container {
+  display: none;
+}
