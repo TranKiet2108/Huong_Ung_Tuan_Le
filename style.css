@@ -2,7 +2,7 @@ body {
  html, body {
   margin: 0;
   padding: 0;
-  overflow: hidden; /* ⭐ Ngăn cuộn khi di chuyển ảnh */
+  overflow: hidden; /* â­ NgÄƒn cuá»™n khi di chuyá»ƒn áº£nh */
   height: 100vh;
 }
 .container {
@@ -13,7 +13,7 @@ body {
   width: 100%;
   max-width: 900px;
   text-align: center;
-  /* ❌ ĐỪNG DÙNG max-height/overflow ở đây */
+  /* âŒ Äá»ªNG DÃ™NG max-height/overflow á»Ÿ Ä‘Ã¢y */
 }
 h1 {
   color: #333;
