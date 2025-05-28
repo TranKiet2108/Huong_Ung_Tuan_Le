@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tạo Khung Viền Sự Kiện</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Tạo Khung Viền Ảnh Sự Kiện</h1>
+
+    <div class="controls-unified">
+      <div class="upload-container">
+        <label for="imageUpload" class="upload-button">Tải Ảnh Lên</label>
+        <input type="file" id="imageUpload" accept="image/*" />
+      </div>
+
+      <div class="frame-selection-container">
+        <h2>Chọn Khung Viền:</h2>
+        <div id="frameOptionsContainer" class="frame-options"></div>
+      </div>
+    </div>
+
+    <div class="preview-area">
+      <canvas id="previewCanvas"></canvas>
+      <div class="resize-controls">
+        <label for="imageSize">Kích thước ảnh:</label>
+        <input type="range" id="imageSize" min="10" max="300" value="100" />
+        <span id="imageSizeValue">100%</span>
+      </div>
+    </div>
+
+    <button id="downloadButton" class="download-button" disabled>Tải Ảnh Về</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
