@@ -182,7 +182,7 @@ previewCanvas.addEventListener('touchstart', (e) => {
 previewCanvas.addEventListener('touchmove', (e) => {
   if (!isDragging || !userImage || e.touches.length !== 1) return;
 
-  e.preventDefault(); // ⭐ NGĂN CUỘN TRANG KHI KÉO ẢNH ⭐
+  e.preventDefault(); // NGĂN CUỘN TRANG
 
   const touch = e.touches[0];
   const rect = previewCanvas.getBoundingClientRect();
@@ -192,7 +192,7 @@ previewCanvas.addEventListener('touchmove', (e) => {
   imageX = moveX - dragStartX;
   imageY = moveY - dragStartY;
   drawCanvas();
-}, { passive: false }); // ⭐ PHẢI THÊM ĐỂ preventDefault() HOẠT ĐỘNG TRÊN MOBILE
+}, { passive: false }); // BẮT BUỘC phải có
 ['touchend', 'touchcancel'].forEach(evt =>
   previewCanvas.addEventListener(evt, () => {
     isDragging = false;
