@@ -1,26 +1,20 @@
 body {
-  font-family: Arial, sans-serif;
+ html, body {
   margin: 0;
   padding: 0;
-  overflow: hidden; /* ⭐ Ngăn cuộn toàn trang ⭐ */
-  background-color: #f4f4f4;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
+  overflow: hidden; /* ⭐ Ngăn cuộn khi di chuyển ảnh */
+  height: 100vh;
 }
-
 .container {
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  max-width: 100vw;     /* ⭐ Không vượt chiều ngang màn hình */
-  max-height: 100vh;    /* ⭐ Không vượt chiều cao màn hình */
-  overflow: hidden;     /* ⭐ Không cho nội dung tràn ra ngoài */
+  width: 100%;
+  max-width: 900px;
   text-align: center;
+  /* ❌ ĐỪNG DÙNG max-height/overflow ở đây */
 }
-
 h1 {
   color: #333;
   margin-bottom: 20px;
