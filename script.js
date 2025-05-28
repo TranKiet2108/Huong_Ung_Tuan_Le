@@ -125,6 +125,43 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   previewCanvas.addEventListener('mousedown', (e) => {
+previewCanvas.addEventListener('touchstart', (e) => {
+  if (!userImage || e.touches.length !== 1) return;
+  const touch = e.touches[0];
+  const rect = previewCanvas.getBoundingClientRect();
+  const touchX = touch.clientX - rect.left;
+  const touchY = touch.clientY - rect.top;
+
+  const scaledWidth = userImage.naturalWidth * imageScale;
+  const scaledHeight = userImage.naturalHeight * imageScale;
+
+  const imgLeft = imageX - scaledWidth / 2;
+  const imgRight = imageX + scaledWidth / 2;
+  const imgTop = imageY - scaledHeight / 2;
+  const imgBottom = imageY + scaledHeight / 2;
+
+  if (touchX >= imgLeft && touchX <= imgRight && touchY >= imgTop && touchY <= imgBottom) {
+    isDragging = true;
+    dragStartX = touchX - imageX;
+    dragStartY = touchY - imageY;
+  }
+});
+previewCanvas.addEventListener('touchmove', (e) => {
+  if (!isDragging || !userImage || e.touches.length !== 1) return;
+  const touch = e.touches[0];
+  const rect = previewCanvas.getBoundingClientRect();
+  const moveX = touch.clientX - rect.left;
+  const moveY = touch.clientY - rect.top;
+
+  imageX = moveX - dragStartX;
+  imageY = moveY - dragStartY;
+  drawCanvas();
+});
+['touchend', 'touchcancel'].forEach(evt =>
+  previewCanvas.addEventListener(evt, () => {
+    isDragging = false;
+  })
+);
     if (!userImage) return;
     const rect = previewCanvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
